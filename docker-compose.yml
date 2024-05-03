@@ -41,19 +41,15 @@ services:
 
   #MySQL Service
   db:
-    image: mariadb:10.3
-    container_name: spalopia-backend-db
-    restart: unless-stopped
-    tty: true
-    ports:
-      - "3310:3306" # 3307:3307
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: '${DB_USERNAME}'
-      MYSQL_PASS: '${DB_PASSWORD}'
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      - MYSQL_DATABASE=spalopia
+      - MYSQL_ROOT_PASSWORD=cbt-main_2022
+    ports:
+      - '3307:3306'
     volumes:
       - /opt/mysql_spalopia_backend:/var/lib/mysql
     networks:
