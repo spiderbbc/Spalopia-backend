@@ -1,0 +1,99 @@
+version: "3.7"
+services:
+  #PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spalopia-backend-app
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      APP_ENV: local
+      CONTAINER_ROLE: app
+      DB_HOST: db
+      MEMCACHED_HOST: app
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_DRIVER: redis
+      REDIS_HOST: redis
+    networks:
+      - app-network-spalopia-backend
+  
+  #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: spalopia-backend-webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - '${APP_PORT:-8080}:80' # 443:443
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/  
+      #- ./docker/nginx/certs/:/etc/nginx/certs
+    networks:
+      - app-network-spalopia-backend
+
+  #MySQL Service
+  db:
+    image: mariadb:10.3
+    container_name: spalopia-backend-db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3310:3306" # 3307:3307
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASS: '${DB_PASSWORD}'
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - /opt/mysql_spalopia_backend:/var/lib/mysql
+    networks:
+      - app-network-spalopia-backend
+  
+  # PhpMyadmin
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8090:80
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - app-network-spalopia-backend  
+  
+  #Redis Service
+  redis:
+    image: "redis:alpine"
+    container_name: spalopia-backend-redis
+    command: redis-server --requirepass sOmE_sEcUrE_pAsS
+    ports:
+     - "6380:6379" # 6379:6379
+    volumes:
+     - ./docker/redis/redis-data:/usr/local/etc/redis
+     - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+     - REDIS_REPLICATION_MODE=master
+    networks:
+      - app-network-spalopia-backend
+        
+#Docker Networks
+networks:
+ app-network-spalopia-backend:
+    driver: bridge
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local
