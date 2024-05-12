@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ServiciosDeSpaSeeder::class,
             ReservasServicioSeeder::class,
-            HorariosServicioSeeder::class
+            HorariosServicioSeeder::class,
+            ServiciosDeSpaTraduccionesSeeder::class
         ]);
     }
 }
