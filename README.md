@@ -52,6 +52,11 @@ Este repositorio contiene un proyecto Laravel configurado para ejecutarse en Doc
 
     ```
     GET http://localhost:8080/api/servicios
+    # en otro idiomas disponibles
+    GET http://localhost:8080/api/servicios/eng
+    GET http://localhost:8080/api/servicios/pt
+    GET http://localhost:8080/api/servicios/it
+    GET http://localhost:8080/api/servicios/fr
     ```
 
  2. **Listado de las horas disponibles de un servicio en una fecha concreta:**
